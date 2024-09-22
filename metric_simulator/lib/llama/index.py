@@ -9,7 +9,6 @@ class LLamaLLM(LLMBase):
         # Call the parent class constructor to initialize ranges
         super().__init__()
 
-        self.prompt = ""
         self.llm_name = name
 
     def get_ttft(self):

@@ -1,7 +1,14 @@
+import os
+import hashlib
 import numpy as np
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SEED_VALUE = os.getenv("SEED", "")
 
 
-def generate_data_points(min_val: float, max_val: float, size: int = 1000) -> list:
+def generate_data_points(min_val: float, max_val: float, llm_name: str, metric: str, size: int = 1000) -> list:
     """
     Generates a list of random data points within a specified range.
 
@@ -16,4 +23,7 @@ def generate_data_points(min_val: float, max_val: float, size: int = 1000) -> li
     Returns:
         list: A list of generated data points.
     """
+    unique_string = f"{llm_name}_{metric}_{SEED_VALUE}"
+    unique_seed = int(hashlib.md5(unique_string.encode()).hexdigest(), 16) % (2**32)
+    np.random.seed(unique_seed)
     return np.round(np.random.uniform(min_val, max_val, size), 2).tolist()

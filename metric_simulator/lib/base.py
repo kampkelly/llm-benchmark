@@ -48,7 +48,7 @@ class LLMBase(ABC):
             list: A list of data points for the specified metric.
         """
         ranges = self.ranges[metric]
-        data_points = generate_data_points(ranges[0], ranges[1])
+        data_points = generate_data_points(ranges[0], ranges[1], self.llm_name, metric)
         return data_points
 
     @abstractmethod
