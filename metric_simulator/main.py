@@ -1,32 +1,34 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from database.session import engine
 from database import Base, settings_config
+from database.session import get_db
+from metric_simulator.metric_service import MetricService
+from database import LLMRepository, MetricRepository, SimulatorRepository
 
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
 
 
-def start_application():
-    app = FastAPI(title=settings_config.PROJECT_NAME, version=settings_config.PROJECT_VERSION)
-    origins = ["*"]
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+def start_application(lifespan):
+    app = FastAPI(title=settings_config.PROJECT_NAME, version=settings_config.PROJECT_VERSION, lifespan=lifespan)
     create_tables()
     return app
 
 
-app = start_application()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = next(get_db())
+    llm_repository = LLMRepository(db)
+    metric_repository = MetricRepository(db)
+    simulator_repository = SimulatorRepository(db)
+    metric_service = MetricService(llm_repository, metric_repository, simulator_repository)
+    # remove data points
+    metric_service.remove_metrics()
+    # Generate initial data points on startup
+    metric_service.simulate_data_points()
 
+    yield
 
-@app.get("/healthz")
-def read_root():
-    # This endpoint is used to check the health of the application
-    return {"message": "success"}
+app = start_application(lifespan)
