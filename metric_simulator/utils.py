@@ -23,7 +23,9 @@ def generate_data_points(min_val: float, max_val: float, llm_name: str, metric: 
     Returns:
         list: A list of generated data points.
     """
-    unique_string = f"{llm_name}_{metric}_{SEED_VALUE}"
-    unique_seed = int(hashlib.md5(unique_string.encode()).hexdigest(), 16) % (2**32)
-    np.random.seed(unique_seed)
+    if SEED_VALUE:
+        unique_string = f"{llm_name}_{metric}_{SEED_VALUE}"
+        unique_seed = int(hashlib.md5(unique_string.encode()).hexdigest(), 16) % (2**32)
+        np.random.seed(unique_seed)
+
     return np.round(np.random.uniform(min_val, max_val, size), 2).tolist()
