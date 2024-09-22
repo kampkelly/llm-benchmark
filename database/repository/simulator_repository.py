@@ -72,7 +72,6 @@ class SimulatorRepository:
         query = (
             self.db.query(
                 LLM.name.label('llm_name'),
-                # Metric.name.label('metric_name'),
                 func.avg(Simulation.value).label('mean_value')
             )
             .join(Simulation.llm)

@@ -1,3 +1,4 @@
+from fastapi import Depends
 from database import LLMRepository, MetricRepository, SimulatorRepository
 
 
@@ -5,16 +6,10 @@ class BenchmarkService:
     """
     This class provides a service for benchmarking large language models (LLMs)
     based on various metrics and simulations.
-    It utilizes repositories for managing LLMs, metrics, and simulations to facilitate the benchmarking process.
     """
-    def __init__(self,
-                 llm_repository: LLMRepository,
-                 metric_repository: MetricRepository,
-                 simulator_repository: SimulatorRepository):
-        """
-        Initializes the BenchmarkService with the provided repositories for managing large language models,
-        metrics, and simulations.
-        """
+    def __init__(self, llm_repository: LLMRepository = Depends(LLMRepository), 
+                 metric_repository: MetricRepository = Depends(MetricRepository), 
+                 simulator_repository: SimulatorRepository = Depends(SimulatorRepository)):
         self.llm_repository = llm_repository
         self.metric_repository = metric_repository
         self.simulator_repository = simulator_repository
@@ -27,6 +22,10 @@ class BenchmarkService:
         results = []
         for metric in metrics:
             simulations = self.simulator_repository.get_metric_means_by_llm(metric.name)
-            results.append({metric.name: simulations})
+            rounded_simulations = [
+                {'llm_name': sim[0], 'mean_value': round(sim[1], 2)}
+                for sim in simulations
+            ]
+            results.append({metric.name: rounded_simulations})
 
-        return results
+        return {"data": results}

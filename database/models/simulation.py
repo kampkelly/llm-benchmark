@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, Float, ForeignKey
+from sqlalchemy import Column, Float, ForeignKey, Index
 from database.base_class import Base
 
 
@@ -12,6 +12,12 @@ class Simulation(Base):
 
     llm = relationship("LLM")
     metric = relationship("Metric")
+
+    # Add indexes
+    __table_args__ = (
+        Index('ix_simulations_llm_id', llm_id),
+        Index('ix_simulations_metric_id', metric_id),
+    )
 
     def __repr__(self):
         return (

@@ -1,14 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 from database import settings_config
-from database.session import get_db
-from metric_benchmark.apis.benchmark_service import BenchmarkService
-from database import LLMRepository, MetricRepository, SimulatorRepository
+from metric_benchmark.apis.base import api_router
 
 
-def start_application(lifespan):
-    app = FastAPI(title=settings_config.PROJECT_NAME, version=settings_config.PROJECT_VERSION, lifespan=lifespan)
+def include_router(app):
+    app.include_router(api_router)
+
+
+def start_application():
+    app = FastAPI(title=settings_config.PROJECT_NAME, version=settings_config.PROJECT_VERSION)
     origins = ["*"]
 
     app.add_middleware(
@@ -18,21 +19,11 @@ def start_application(lifespan):
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    include_router(app)
     return app
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    db = next(get_db())
-    llm_repository = LLMRepository(db)
-    metric_repository = MetricRepository(db)
-    simulator_repository = SimulatorRepository(db)
-    benchmark_service = BenchmarkService(llm_repository, metric_repository, simulator_repository)
-    benchmark_service.get_simulation_and_rankings()
-
-    yield
-
-app = start_application(lifespan)
+app = start_application()
 
 
 @app.get("/healthz")
