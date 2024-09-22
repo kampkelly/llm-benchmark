@@ -31,7 +31,7 @@ install:
 	@echo "Installing packages..."
 	pip install -r requirements.txt
 
-# Start the FastAPI app
+# Start the FastAPI app for metric simulator
 start-simulator:
 ifdef PORT
 	@echo "Starting app on port ${PORT}..."
@@ -39,6 +39,16 @@ ifdef PORT
 else
 	@echo "Starting app on port 8000..."
 	uvicorn metric_simulator.main:app --reload
+endif
+
+# Start the FastAPI app for metric becnhmark
+start-benchmark:
+ifdef PORT
+	@echo "Starting app on port ${PORT}..."
+	uvicorn metric_benchmark.main:app --reload --port ${PORT}
+else
+	@echo "Starting app on port 8000..."
+	uvicorn metric_benchmark.main:app --reload --port 8001
 endif
 
 # Help command to display available commands

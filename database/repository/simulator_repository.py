@@ -1,9 +1,9 @@
 from uuid import UUID
-from typing import List
+from typing import List, Tuple
 from fastapi import Depends
-from sqlalchemy import insert
+from sqlalchemy import insert, func
 from sqlalchemy.orm import Session
-from database import Simulation
+from database import LLM, Metric, Simulation
 from database.session import get_db
 
 
@@ -57,3 +57,29 @@ class SimulatorRepository:
         """
         self.db.query(Simulation).delete(synchronize_session=False)
         self.db.commit()
+
+    def get_metric_means_by_llm(self, metric_name: str) -> List[Tuple[str, str, float]]:
+        """
+        Retrieves the mean simulation metric values for given metric.
+
+        Args:
+            metric_name (str): The name of the metric to filter by. If not provided, all metrics are considered.
+
+        Returns:
+            List[Tuple[str, str, float]]: A list of tuples containing the LLM name, metric name,
+            and the mean metric value.
+        """
+        query = (
+            self.db.query(
+                LLM.name.label('llm_name'),
+                # Metric.name.label('metric_name'),
+                func.avg(Simulation.value).label('mean_value')
+            )
+            .join(Simulation.llm)
+            .join(Simulation.metric)
+            .filter(Metric.name == metric_name)
+            .group_by(LLM.name, Metric.name)
+            .order_by(func.avg(Simulation.value).desc())
+        )
+
+        return query.all()
