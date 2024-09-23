@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  metric_benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile-benchmark
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+      - postgres
+      - metric_simulator
+
+  metric_simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile-simulator
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6380:6379"
+
+  postgres:
+    image: "postgres:13"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

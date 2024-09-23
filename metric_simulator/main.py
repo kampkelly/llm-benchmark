@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from database.session import engine
 from database import Base, settings_config
 from database.session import get_db
+from database.seed import seed_data
 from apscheduler.schedulers.background import BackgroundScheduler
 from metric_simulator.metric_service import MetricService
 from database import LLMRepository, MetricRepository, SimulatorRepository
@@ -32,6 +33,8 @@ scheduler = BackgroundScheduler()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = next(get_db())
+    # seed initial app data
+    seed_data(db)
     llm_repository = LLMRepository(db)
     metric_repository = MetricRepository(db)
     simulator_repository = SimulatorRepository(db)

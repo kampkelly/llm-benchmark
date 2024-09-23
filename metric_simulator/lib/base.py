@@ -8,7 +8,7 @@ class LLMType(Enum):
     Enum for defining types of Language Learning Models (LLMs).
     """
     OPENAI = "openai"
-    LLAMA = "llama"
+    LLAMA = "meta"
     CLAUDE = "anthropic"
 
 
