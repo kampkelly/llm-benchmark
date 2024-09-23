@@ -1,4 +1,6 @@
+import json
 from fastapi import Depends
+from redis_client import RedisClient, RedisKeys
 from database import LLMRepository, MetricRepository, SimulatorRepository
 
 
@@ -18,6 +20,11 @@ class BenchmarkService:
         """
         Retrieves all metrics and their corresponding simulations, then ranks them based on their means.
         """
+        redis_client = RedisClient()
+        if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
+            redis_results = json.loads(redis_client.redis.get(RedisKeys.BENCHMARKS.value))
+            return {"data": redis_results}
+
         metrics = self.metric_repository.get_metrics()
         results = []
         for metric in metrics:
@@ -27,5 +34,7 @@ class BenchmarkService:
                 for sim in simulations
             ]
             results.append({metric.name: rounded_simulations})
+
+        redis_client.redis.set(RedisKeys.BENCHMARKS.value, json.dumps(results))
 
         return {"data": results}

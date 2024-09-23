@@ -1,5 +1,6 @@
 from database import LLMRepository, MetricRepository, SimulatorRepository
 from metric_simulator.lib import MetricGenerator
+from redis_client import RedisClient, RedisKeys
 
 
 class MetricService:
@@ -27,6 +28,9 @@ class MetricService:
 
         store = {}
 
+        # remove existing data points
+        self.remove_metrics()
+
         for llm in llms:
             metric_generator = MetricGenerator(llm.company_name, llm.name)
             store[llm.id] = {}
@@ -35,6 +39,11 @@ class MetricService:
                 store[llm.id] = {metric.id: generated_metrics}
 
                 self.simulator_repository.bulk_add_metrics(llm.id, metric.id, generated_metrics)
+
+        redis_client = RedisClient()
+
+        if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
+            redis_client.delete_key(RedisKeys.BENCHMARKS.value)
 
     def remove_metrics(self):
         """

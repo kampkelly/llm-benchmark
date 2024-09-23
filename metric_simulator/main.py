@@ -1,4 +1,6 @@
+import os
 from fastapi import FastAPI
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from database.session import engine
 from database import Base, settings_config
@@ -7,7 +9,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from metric_simulator.metric_service import MetricService
 from database import LLMRepository, MetricRepository, SimulatorRepository
 
+load_dotenv()
+
 scheduler = BackgroundScheduler()
+
+SCHEDULE_INTERVAL = os.getenv("SCHEDULE_INTERVAL", "1")
 
 
 def create_tables():
@@ -30,13 +36,11 @@ async def lifespan(app: FastAPI):
     metric_repository = MetricRepository(db)
     simulator_repository = SimulatorRepository(db)
     metric_service = MetricService(llm_repository, metric_repository, simulator_repository)
-    # remove data points
-    metric_service.remove_metrics()
     # Generate initial data points on startup
     metric_service.simulate_data_points()
 
     # schedule simulation generation of data points every 1 minute
-    scheduler.add_job(metric_service.simulate_data_points, 'interval', minutes=1)
+    scheduler.add_job(metric_service.simulate_data_points, 'interval', minutes=int(SCHEDULE_INTERVAL))
     scheduler.start()
 
     yield

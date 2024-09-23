@@ -7,3 +7,4 @@ alembic
 pydantic
 numpy
 APScheduler
+redis[hiredis]
