@@ -99,7 +99,6 @@ celerybeat-schedule
 
 # dotenv
 .env
-.env.*
 
 # FastAPI specific
 *sqlite.db

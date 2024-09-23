@@ -1,0 +1,68 @@
+{
+    "data": [
+        {
+            "ttft": [
+                {
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 1.03
+                },
+                {
+                    "llm_name": "Llama 3.1 70B",
+                    "mean_value": 1.02
+                },
+                {
+                    "llm_name": "GPT-4o",
+                    "mean_value": 1.01
+                }
+            ]
+        },
+        {
+            "tps": [
+                {
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 82.04
+                },
+                {
+                    "llm_name": "Llama 3.1 70B",
+                    "mean_value": 79.87
+                },
+                {
+                    "llm_name": "GPT-4o",
+                    "mean_value": 77.8
+                }
+            ]
+        },
+        {
+            "e2e_latency": [
+                {
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 5.18
+                },
+                {
+                    "llm_name": "GPT-4o",
+                    "mean_value": 5.17
+                },
+                {
+                    "llm_name": "Llama 3.1 70B",
+                    "mean_value": 5.06
+                }
+            ]
+        },
+        {
+            "rps": [
+                {
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 51.77
+                },
+                {
+                    "llm_name": "GPT-4o",
+                    "mean_value": 49.69
+                },
+                {
+                    "llm_name": "Llama 3.1 70B",
+                    "mean_value": 49.29
+                }
+            ]
+        }
+    ]
+}

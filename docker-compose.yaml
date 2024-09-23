@@ -5,8 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-benchmark
+    image: metric-benchmark:latest
     ports:
-      - "8000:8000"
+      - "8001:8000"
     env_file:
       - .env
     volumes:
@@ -20,6 +21,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-simulator
+    image: metric-simulator:latest
     env_file:
       - .env
     volumes:
@@ -31,7 +33,7 @@ services:
   redis:
     image: "redis:alpine"
     ports:
-      - "6380:6379"
+      - "6379:6379"
 
   postgres:
     image: "postgres:13"
