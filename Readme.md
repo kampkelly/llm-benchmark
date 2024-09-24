@@ -11,7 +11,8 @@
 8. [Configuration](#configuration)
 9. [Usage](#usage)
 10. [Implementation Details](#implementation-details)
-11. [Troubleshooting](#troubleshooting)
+11. [Data Visualization](#data-visualization)
+12. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -115,6 +116,7 @@ This updates dependencies, copies some needed environment variables and then ins
 
 ## Github Actions
 Whenever you push changes to the main branch of this repository, the GitHub Actions workflow will automatically trigger build and deployment.
+Ensure env variables are properly setup in repository secrets.
 You can monitor the progress in the "Actions" tab of this GitHub repository.
 
 ## Configuration
@@ -155,12 +157,12 @@ The response will be a JSON object containing the rankings of LLMs for the speci
         {
             "ttft": [
                 {
-                    "llm_name": "Claude 3.5 Sonnet",
-                    "mean_value": 1.05
+                    "llm_name": "GPT-4o",
+                    "mean_value": 1.07
                 },
                 {
-                    "llm_name": "GPT-4o",
-                    "mean_value": 1.03
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 1.05
                 },
                 ...
             ]
@@ -168,8 +170,8 @@ The response will be a JSON object containing the rankings of LLMs for the speci
         {
             "tps": [
                 {
-                    "llm_name": "Claude 3.5 Sonnet",
-                    "mean_value": 80.45
+                    "llm_name": "GPT-4o",
+                    "mean_value": 82.15
                 },
                 ...
             ]
@@ -179,14 +181,26 @@ The response will be a JSON object containing the rankings of LLMs for the speci
 ```
 
 ### Implementation Details
-The metric simulation makes use of a randomizer which generates random values from a uniform distribution. It optionally makes use of a seed whose default seed value is 3. The response attained from this seed value (3) can be found in response.json file. To change the seed, please update the value in the readme.
+The metric simulation makes use of a randomizer which generates random values from a uniform distribution. It optionally makes use of a seed whose default seed value is 20. The response attained from this seed value (20) can be found in public/response.json file. To change the seed, please update the value in the .env file.
 
 Some initial data for llms and metrics (not data points) are seeded into the database the first time the server boots up. This allows for easy testing and generation of data points for the metrics.
 
-On calling the rankings API, itakes approximately 60 - 80 milliseconds to return a response. The result is then cached for faster retrieval further reducing the latency to less than 10 milliseconds The expiry of this cache is controlled by the repeated job that regenerates the metrics and clears the cache every x minutes. To configure x minutes, update the `SCHEDULE_INTERVAL` in .env file
+On calling the rankings API, itakes approximately 60 - 80 milliseconds to return a response. The result is then cached for faster retrieval further reducing the latency to less than 10 milliseconds The expiry of this cache is controlled by the repeated job that regenerates the metrics and clears the cache every x minutes. To configure x minutes, update the `SCHEDULE_INTERVAL` in .env file.
 
+##### Retries
 This scheculed job has a retry functionality built into it such that it retries the requests up to `x` times with a `y` secs delay in-between where `x` and `y` are `MAX_RETRIES` (default is 2) and `RETRY_DELAY` (default is 60) respectively. They both can be configured from the .env file.
-This retry is managed by redis and also implements a lock to ensure only one job is running at a time which is suitable for a distributed environment
+This retry is managed by redis and also implements a lock to ensure only one job is running at a time which is suitable for a distributed environment.
+
+## Data Visualization
+Grafana should already be installed and running after running `docker-compose up`.
+Once Grafana is running, open it in your browser: `http://localhost:3000`
+1. Login to Grafana: Default login is admin/admin (you will be prompted to change the password).
+2. Install the Infinity datasource if it is not already installed
+3. Create a new dashboard and click on "Import". Then input the json in public/LLM_Performance_Dashboard.json in the input box and load. Now you should be able to view the data as shown below from the rankings api.
+
+<img src="./public/dashboard.png" alt="Dashboard Preview" width="800" height="400">
+
+
 
 ## Troubleshooting
 

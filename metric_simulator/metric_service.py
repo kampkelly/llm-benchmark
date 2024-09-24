@@ -1,4 +1,5 @@
 import os
+import redis
 from typing import Any
 from dotenv import load_dotenv
 from database import LLMRepository, MetricRepository, SimulatorRepository
@@ -38,10 +39,17 @@ class MetricService:
             with redis_client.redis.lock(RedisKeys.RETRY_BENCHMARKS_LOCK.value, timeout=MAX_RETRIES * RETRY_DELAY,
                                          blocking=True, blocking_timeout=10) as lock:
                 await self.simulate_data_points()
+        except redis.exceptions.LockError as lock_error:
+            print(f"Redis lock error: {lock_error}")
         except Exception as e:
             print(f"Error during simulating data points: {e}")
         finally:
-            lock.release()
+            # Check if the lock exists and locked before trying to release
+            if 'lock' in locals() and lock.locked():
+                try:
+                    lock.release()
+                except redis.exceptions.LockError:
+                    print("Lock was already released")
 
     async def simulate_data_points(self):
         """
@@ -54,16 +62,13 @@ class MetricService:
         # remove existing data points
         self.remove_metrics()
         redis_client = RedisClient()
-
-        for llm in [llms[0]]:
+        for llm in llms:
             metric_generator = MetricGenerator(llm.company_name, llm.name)
-            for metric in [metrics[0]]:
-                generated_metrics = await self.generate_metric_data(metric_generator, metric.name)
-
+            for metric in metrics:
+                generated_metrics = await self.generate_metric_data(metric_generator, metric.name, llm.name)
                 if generated_metrics:
                     self.simulator_repository.bulk_add_metrics(llm.id, metric.id, generated_metrics)
                     redis_client.redis.delete(f"{RedisKeys.RETRY_BENCHMARKS.value}:{llm.id}:{metric.id}")
-
         if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
             redis_client.delete_key(RedisKeys.BENCHMARKS.value)
 
