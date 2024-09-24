@@ -7,10 +7,11 @@
 4. [Local Development Setup](#local-development-setup)
 5. [Docker Compose Setup](#docker-compose-setup)
 6. [Kubernetes Deployment](#kubernetes-deployment)
-7. [Configuration](#configuration)
-8. [Usage](#usage)
-9. [Implementation Details](#implementation-details)
-10. [Troubleshooting](#troubleshooting)
+7. [Github Actions](#github-actions)
+8. [Configuration](#configuration)
+9. [Usage](#usage)
+10. [Implementation Details](#implementation-details)
+11. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -112,6 +113,10 @@ You can the access the rankings api (more details below) on port `8001`
 `./deploy.sh`
 This updates dependencies, copies some needed environment variables and then installs helm using the environment variables
 
+## Github Actions
+Whenever you push changes to the main branch of this repository, the GitHub Actions workflow will automatically trigger build and deployment.
+You can monitor the progress in the "Actions" tab of this GitHub repository.
+
 ## Configuration
 
 The application can be configured using environment variables. The main configuration options are:
@@ -179,6 +184,9 @@ The metric simulation makes use of a randomizer which generates random values fr
 Some initial data for llms and metrics (not data points) are seeded into the database the first time the server boots up. This allows for easy testing and generation of data points for the metrics.
 
 On calling the rankings API, itakes approximately 60 - 80 milliseconds to return a response. The result is then cached for faster retrieval further reducing the latency to less than 10 milliseconds The expiry of this cache is controlled by the repeated job that regenerates the metrics and clears the cache every x minutes. To configure x minutes, update the `SCHEDULE_INTERVAL` in .env file
+
+This scheculed job has a retry functionality built into it such that it retries the requests up to `x` times with a `y` secs delay in-between where `x` and `y` are `MAX_RETRIES` (default is 2) and `RETRY_DELAY` (default is 60) respectively. They both can be configured from the .env file.
+This retry is managed by redis and also implements a lock to ensure only one job is running at a time which is suitable for a distributed environment
 
 ## Troubleshooting
 

@@ -1,11 +1,40 @@
 import os
+import asyncio
 import hashlib
 import numpy as np
 from dotenv import load_dotenv
+from redis_client import RedisKeys
 
 load_dotenv()
 
 SEED_VALUE = os.getenv("SEED", "")
+
+
+def retry_on_failure(redis_client, max_retries=5, delay=60):
+    def decorator(func):
+        async def wrapper(metric_generator, metric_name, llm_name, *args, **kwargs):
+            retry_key = f"{RedisKeys.RETRY_BENCHMARKS.value}:{llm_name}:{metric_name}"
+            current_attempt = redis_client.redis.get(retry_key)
+            if current_attempt is None:
+                current_attempt = 0
+            else:
+                current_attempt = int(current_attempt)
+
+            while current_attempt <= max_retries:
+                try:
+                    return await func(metric_generator, metric_name, llm_name, *args, **kwargs)
+                except Exception as e:
+                    redis_client.redis.set(retry_key, current_attempt + 1, ex=60)  # Set expiry for 60 seconds
+                    print(f"Error generating metrics for LLM {llm_name}, attempt {current_attempt + 1}: {str(e)}")
+                    current_attempt += 1
+                    if current_attempt <= max_retries:
+                        # wait before retrying
+                        await asyncio.sleep(delay)
+
+            print(f"Max retries reached for LLM {llm_name} for metric {metric_name}, skipping.")
+            return None
+        return wrapper
+    return decorator
 
 
 def generate_data_points(min_val: float, max_val: float, llm_name: str, metric: str, size: int = 1000) -> list:

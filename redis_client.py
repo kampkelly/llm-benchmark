@@ -11,6 +11,8 @@ REDIS_PORT = os.getenv("REDIS_PORT", "")
 
 class RedisKeys(Enum):
     BENCHMARKS = "benchmarks"
+    RETRY_BENCHMARKS = "retry_benchmarks"
+    RETRY_BENCHMARKS_LOCK = "retry_benchmarks_lock"
 
 
 class RedisClient:

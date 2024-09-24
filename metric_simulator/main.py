@@ -1,4 +1,5 @@
 import os
+import asyncio
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
@@ -6,15 +7,15 @@ from database.session import engine
 from database import Base, settings_config
 from database.session import get_db
 from database.seed import seed_data
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from metric_simulator.metric_service import MetricService
 from database import LLMRepository, MetricRepository, SimulatorRepository
 
 load_dotenv()
 
-scheduler = BackgroundScheduler()
+scheduler = AsyncIOScheduler()
 
-SCHEDULE_INTERVAL = os.getenv("SCHEDULE_INTERVAL", "1")
+SCHEDULE_INTERVAL = os.getenv("SCHEDULE_INTERVAL", "3")
 
 
 def create_tables():
@@ -27,9 +28,6 @@ def start_application(lifespan):
     return app
 
 
-scheduler = BackgroundScheduler()
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = next(get_db())
@@ -39,11 +37,15 @@ async def lifespan(app: FastAPI):
     metric_repository = MetricRepository(db)
     simulator_repository = SimulatorRepository(db)
     metric_service = MetricService(llm_repository, metric_repository, simulator_repository)
-    # Generate initial data points on startup
-    metric_service.simulate_data_points()
 
-    # schedule simulation generation of data points every 1 minute
-    scheduler.add_job(metric_service.simulate_data_points, 'interval', minutes=int(SCHEDULE_INTERVAL))
+    async def run_simulate_data_points():
+        await metric_service.simulate_data_points_with_retry()
+
+    asyncio.create_task(run_simulate_data_points())
+
+    scheduler.add_job(lambda: asyncio.create_task(run_simulate_data_points), 'interval',
+                      minutes=int(SCHEDULE_INTERVAL))
+
     scheduler.start()
 
     yield

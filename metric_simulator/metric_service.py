@@ -1,6 +1,15 @@
+import os
+from typing import Any
+from dotenv import load_dotenv
 from database import LLMRepository, MetricRepository, SimulatorRepository
 from metric_simulator.lib import MetricGenerator
 from redis_client import RedisClient, RedisKeys
+from metric_simulator.utils import retry_on_failure
+
+load_dotenv()
+
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", "2"))
+RETRY_DELAY = int(os.getenv("RETRY_DELAY", "60"))
 
 
 class MetricService:
@@ -18,7 +27,23 @@ class MetricService:
         self.metric_repository = metric_repository
         self.simulator_repository = simulator_repository
 
-    def simulate_data_points(self):
+    @retry_on_failure(redis_client=RedisClient(), max_retries=MAX_RETRIES, delay=RETRY_DELAY)
+    async def generate_metric_data(self, metric_generator: Any, metric_name: str, llm_name: str):
+        generated_metrics = metric_generator.generate_data_points(metric_name)
+        return generated_metrics
+
+    async def simulate_data_points_with_retry(self):
+        redis_client = RedisClient()
+        try:
+            with redis_client.redis.lock(RedisKeys.RETRY_BENCHMARKS_LOCK.value, timeout=MAX_RETRIES * RETRY_DELAY,
+                                         blocking=True, blocking_timeout=10) as lock:
+                await self.simulate_data_points()
+        except Exception as e:
+            print(f"Error during simulating data points: {e}")
+        finally:
+            lock.release()
+
+    async def simulate_data_points(self):
         """
         Simulates data points for all LLMs and metrics.
         It uses MetricGenerator to generate the data points and stores them with SimulatorRepository
@@ -26,21 +51,18 @@ class MetricService:
         llms = self.llm_repository.get_llms()
         metrics = self.metric_repository.get_metrics()
 
-        store = {}
-
         # remove existing data points
         self.remove_metrics()
-
-        for llm in llms:
-            metric_generator = MetricGenerator(llm.company_name, llm.name)
-            store[llm.id] = {}
-            for metric in metrics:
-                generated_metrics = metric_generator.generate_data_points(metric.name)
-                store[llm.id] = {metric.id: generated_metrics}
-
-                self.simulator_repository.bulk_add_metrics(llm.id, metric.id, generated_metrics)
-
         redis_client = RedisClient()
+
+        for llm in [llms[0]]:
+            metric_generator = MetricGenerator(llm.company_name, llm.name)
+            for metric in [metrics[0]]:
+                generated_metrics = await self.generate_metric_data(metric_generator, metric.name)
+
+                if generated_metrics:
+                    self.simulator_repository.bulk_add_metrics(llm.id, metric.id, generated_metrics)
+                    redis_client.redis.delete(f"{RedisKeys.RETRY_BENCHMARKS.value}:{llm.id}:{metric.id}")
 
         if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
             redis_client.delete_key(RedisKeys.BENCHMARKS.value)
