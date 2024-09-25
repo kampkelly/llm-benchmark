@@ -142,14 +142,15 @@ Once the application is running, you can interact with it using the provided API
 
 This API provides an endpoint to fetch the rankings of various Language Learning Models (LLMs) based on their benchmark results. The rankings are calculated using simulation metrics such as Time to First Token (TTFT), Tokens Per Second (TPS), End-to-End Request Latency (e2e_latency), and Requests Per Second (RPS).
 
-##### Endpoint
+##### Endpoints
 
 - **GET** `/api/v1/benchmarks/rankings`
-Accessing this endpoint requires an api-key sent in the request headers under `x-api-key`. The value of this api keyh can be set in the .env file `API_KEY=1234`
+Accessing this endpoint requires an api-key sent in the request headers under `x-api-key`. The value of this api key can be set in the .env file `API_KEY=1234`
 
-##### Response
+<br>
 
-The response will be a JSON object containing the rankings of LLMs for the specified metric. The structure of the response is as follows:
+- **Response**
+The response will be a JSON object containing the rankings of LLMs for all the metrics. The structure of the response is as follows (in descending ranking order):
 
 ```json
 {
@@ -180,12 +181,43 @@ The response will be a JSON object containing the rankings of LLMs for the speci
 }
 ```
 
+<br>
+
+- **GET** `/api/v1/benchmarks/rankings/{metric_name}`
+Accessing this endpoint requires an api-key sent in the request headers under `x-api-key`. The value of this api key can be set in the .env file `API_KEY=1234`
+<br>
+- **Response**
+The response will be a JSON object containing the rankings of LLMs for the specified metric. The structure of the response is as follows (in descending ranking order):
+
+```json
+{
+    "data": [
+        {
+            "ttft": [
+                {
+                    "llm_name": "GPT-4o",
+                    "mean_value": 1.07
+                },
+                {
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 1.05
+                },
+                {
+                    "llm_name": "Claude 3.5 Sonnet",
+                    "mean_value": 1.0
+                }
+            ]
+        }
+    ]
+}
+```
+
 ### Implementation Details
 The metric simulation makes use of a randomizer which generates random values from a uniform distribution. It optionally makes use of a seed whose default seed value is 20. The response attained from this seed value (20) can be found in public/response.json file. To change the seed, please update the value in the .env file.
 
 Some initial data for llms and metrics (not data points) are seeded into the database the first time the server boots up. This allows for easy testing and generation of data points for the metrics.
 
-On calling the rankings API, itakes approximately 60 - 80 milliseconds to return a response. The result is then cached for faster retrieval further reducing the latency to less than 10 milliseconds The expiry of this cache is controlled by the repeated job that regenerates the metrics and clears the cache every x minutes. To configure x minutes, update the `SCHEDULE_INTERVAL` in .env file.
+On calling the rankings and get rankings by metric name API, itakes approximately 60 - 80 milliseconds to return a response. The result is then cached for faster retrieval further reducing the latency to less than 20 milliseconds The expiry of this cache is controlled by the repeated job that regenerates the metrics and clears the cache every x minutes. To configure x minutes, update the `SCHEDULE_INTERVAL` in .env file.
 
 ##### Retries
 This scheculed job has a retry functionality built into it such that it retries the requests up to `x` times with a `y` secs delay in-between where `x` and `y` are `MAX_RETRIES` (default is 2) and `RETRY_DELAY` (default is 60) respectively. They both can be configured from the .env file.

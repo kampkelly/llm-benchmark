@@ -24,3 +24,14 @@ class MetricRepository:
         """
         metrics = self.db.query(Metric).all()
         return metrics
+
+    def get_metric_by_name(self, metric_name: str) -> Metric:
+        """
+        Retrieves a metric by its name from the database.
+        Args:
+            metric_name (str): The name of the metric to retrieve.
+        Returns:
+            Metric: The metric with the specified name.
+        """
+        metric = self.db.query(Metric).filter(Metric.name == metric_name).first()
+        return metric

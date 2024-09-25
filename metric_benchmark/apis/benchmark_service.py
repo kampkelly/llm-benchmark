@@ -1,5 +1,5 @@
 import json
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from redis_client import RedisClient, RedisKeys
 from database import LLMRepository, MetricRepository, SimulatorRepository
 
@@ -18,7 +18,7 @@ class BenchmarkService:
 
     def get_simulation_and_rankings(self):
         """
-        Retrieves all metrics and their corresponding simulations, then ranks them based on their means.
+        Retrieves all metrics and their corresponding simulations, then ranks the llms based on their means.
         """
         redis_client = RedisClient()
         if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
@@ -38,3 +38,27 @@ class BenchmarkService:
         redis_client.redis.set(RedisKeys.BENCHMARKS.value, json.dumps(results))
 
         return {"data": results}
+
+    def get_simulation_and_rankings_by_metric_name(self, metric_name):
+        """
+        Retrieves a metric and its corresponding simulations, then ranks the llms based on the mean values.
+        """
+        redis_client = RedisClient()
+        if redis_client.redis.exists(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}"):
+            redis_results = json.loads(redis_client.redis.get(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}"))
+            return {"data": redis_results}
+
+        metric = self.metric_repository.get_metric_by_name(metric_name)
+        if not metric:
+            raise HTTPException(status_code=404, detail="Metric not found")
+
+        simulations = self.simulator_repository.get_metric_means_by_llm(metric.name)
+        rounded_simulations = [
+            {'llm_name': sim[0], 'mean_value': round(sim[1], 2)}
+            for sim in simulations
+        ]
+        result = {metric.name: rounded_simulations}
+
+        redis_client.redis.set(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}", json.dumps(result))
+
+        return {"data": result}

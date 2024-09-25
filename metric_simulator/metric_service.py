@@ -69,6 +69,9 @@ class MetricService:
                 if generated_metrics:
                     self.simulator_repository.bulk_add_metrics(llm.id, metric.id, generated_metrics)
                     redis_client.redis.delete(f"{RedisKeys.RETRY_BENCHMARKS.value}:{llm.id}:{metric.id}")
+                    if redis_client.redis.exists(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric.name}"):
+                        redis_client.delete_key(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric.name}")
+
         if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
             redis_client.delete_key(RedisKeys.BENCHMARKS.value)
 
