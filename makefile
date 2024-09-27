@@ -51,6 +51,11 @@ else
 	uvicorn metric_benchmark.main:app --reload --port 8001
 endif
 
+# Run tests
+tests:
+	@echo "Installing packages..."
+	pytest metric_benchmark metric_simulator
+
 # Help command to display available commands
 help:
 	@echo "Available commands"
@@ -61,4 +66,5 @@ help:
 	@echo "  make install-dev       - Install development packages"
 	@echo "  make start-simulator   - Start the Simulator FastAPI app"
 	@echo "  make start-benchmark   - Start the Benchmark FastAPI app"
+	@echo "  make tests   					- Run tests
 	@echo "  make help              - Display this help message"

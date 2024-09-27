@@ -12,6 +12,7 @@
 9. [Usage](#usage)
 10. [Implementation Details](#implementation-details)
 11. [Data Visualization](#data-visualization)
+11. [Testing](#testing)
 12. [Troubleshooting](#troubleshooting)
 
 ## Introduction
@@ -232,6 +233,10 @@ Once Grafana is running, open it in your browser: `http://localhost:3000`
 
 <img src="./public/dashboard.png" alt="Dashboard Preview" width="800" height="400">
 
+
+## Testing
+To run the tests:
+`make tests`
 
 
 ## Troubleshooting

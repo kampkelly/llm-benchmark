@@ -8,3 +8,7 @@ pydantic
 numpy
 APScheduler
 redis[hiredis]
+pytest
+pytest-mock
+pytest-asyncio
+httpx
