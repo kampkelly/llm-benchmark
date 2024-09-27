@@ -59,5 +59,6 @@ help:
 	@echo "  make create-migration  - Create a new migration"
 	@echo "  make install           - Install packages"
 	@echo "  make install-dev       - Install development packages"
-	@echo "  make start-app         - Start the FastAPI app"
+	@echo "  make start-simulator   - Start the Simulator FastAPI app"
+	@echo "  make start-benchmark   - Start the Benchmark FastAPI app"
 	@echo "  make help              - Display this help message"

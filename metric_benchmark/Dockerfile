@@ -5,14 +5,15 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY . /app
+COPY ../ /app
 
+# RUN ls
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Define environment variable
-ENV NAME World
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
 
 # Run app.py when the container launches
-CMD ["uvicorn", "metric_simulator.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-
+CMD ["uvicorn", "metric_benchmark.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# CMD ["ls"]

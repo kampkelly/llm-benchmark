@@ -4,7 +4,7 @@ services:
   metric_benchmark:
     build:
       context: .
-      dockerfile: Dockerfile-benchmark
+      dockerfile: ./metric_benchmark/Dockerfile
     image: kampkelly/metric-benchmark:latest
     ports:
       - "8001:8000"
@@ -20,7 +20,7 @@ services:
   metric_simulator:
     build:
       context: .
-      dockerfile: Dockerfile-simulator
+      dockerfile: ./metric_simulator/Dockerfile
     image: kampkelly/metric-simulator:latest
     env_file:
       - .env
