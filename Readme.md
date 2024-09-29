@@ -37,24 +37,31 @@ The LLM Benchmark application is designed to benchmark and simulate metrics for 
 - Helm 3+ (for Kubernetes deployment)
 
 ## Local Development Setup
-
-1. Clone the repository:
+Prerequisites to run the application
+1. Clone the repository and then create/update .env file using .env.example:
    ```
    git clone https://github.com/kampkelly/llm-benchmark.git
    cd llm-benchmark
    ```
 
-2. Create a virtual environment and activate it:
+##### Running the aplication
+To start the application in a single command, run this:
+```
+chmod +x ./dev-deploy.sh && ./dev-deploy.sh
+```
+
+For a detailed breakdown, see the below steps:
+1. Create a virtual environment and activate it:
    ```
    python -m venv venv
    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
    ```
 
-3. Install dependencies:
+2. Install dependencies:
    `pip install -r requirements.txt` or `make install`
 <br>
 
-4. Set up your `.env` file with the necessary environment variables:
+3. Set up your `.env` file with the necessary environment variables:
    ```
    POSTGRES_USER=
    POSTGRES_HOST=localhost
@@ -68,10 +75,10 @@ The LLM Benchmark application is designed to benchmark and simulate metrics for 
    SEED=3
    ```
 
-5. Run database migrations:
+4. Run database migrations:
    `alembic upgrade head` or `make run-migrations`
 <br>
-6. Start the services:
+5. Start the services:
     Metric simulator
    `uvicorn metric_simulator.main:app --reload` or `make start-simulator`
 
