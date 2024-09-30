@@ -1,5 +1,6 @@
-from enum import Enum
 from abc import ABC, abstractmethod
+from enum import Enum
+
 from metric_simulator.utils import generate_data_points
 
 
@@ -7,6 +8,7 @@ class LLMType(Enum):
     """
     Enum for defining types of Language Learning Models (LLMs).
     """
+
     OPENAI = "openai"
     LLAMA = "meta"
     CLAUDE = "anthropic"
@@ -16,6 +18,7 @@ class LLMMetrics(Enum):
     """
     Enum for defining metrics related to Language Learning Models (LLMs).
     """
+
     TIME_TO_FIRST_TOKEN = "ttft"
     TOKENS_PER_SECOND = "tps"
     END_TO_END_LATENCY = "e2e_latency"
@@ -26,15 +29,16 @@ class LLMBase(ABC):
     """
     Abstract base class for Language Learning Models (LLMs).
     """
+
     def __init__(self):
         """
         Initializes the base class with predefined ranges for LLM metrics.
         """
         self.ranges = {
-            "ttft": (0.05, 2.0),    # Time to First Token (seconds)
-            "tps": (10, 150),       # Tokens Per Second
+            "ttft": (0.05, 2.0),  # Time to First Token (seconds)
+            "tps": (10, 150),  # Tokens Per Second
             "e2e_latency": (0.2, 10.0),  # End-to-End Request Latency (seconds)
-            "rps": (1, 100),        # Requests Per Second
+            "rps": (1, 100),  # Requests Per Second
         }
 
     def get_data_points(self, metric: str):

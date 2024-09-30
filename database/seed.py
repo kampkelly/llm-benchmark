@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from database import Metric, LLM
+
+from database import LLM, Metric
 
 
 def seed_metrics(db: Session):
@@ -8,10 +9,10 @@ def seed_metrics(db: Session):
         return
 
     metric_names = [
-        "ttft",         # Time to First Token
-        "tps",          # Tokens Per Second
+        "ttft",  # Time to First Token
+        "tps",  # Tokens Per Second
         "e2e_latency",  # End-to-End Latency
-        "rps"           # Requests Per Second
+        "rps",  # Requests Per Second
     ]
 
     for name in metric_names:
@@ -30,7 +31,7 @@ def seed_llms(db: Session):
     llm_names = [
         {"name": "GPT-4o", "company_name": "openai"},
         {"name": "Llama 3.1 70B", "company_name": "meta"},
-        {"name": "Claude 3.5 Sonnet", "company_name": "anthropic"}
+        {"name": "Claude 3.5 Sonnet", "company_name": "anthropic"},
     ]
 
     for llm in llm_names:

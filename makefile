@@ -54,7 +54,7 @@ endif
 # Run tests
 tests:
 	@echo "Installing packages..."
-	pytest metric_benchmark metric_simulator
+	REDIS_HOST=localhost pytest metric_benchmark metric_simulator
 
 # Help command to display available commands
 help:

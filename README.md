@@ -29,20 +29,21 @@ The LLM Benchmark application is designed to benchmark and simulate metrics for 
 
 ## Prerequisites
 
-- Python 3.9+
-- Postgres
+- Python 3.12
+- Postgres 3.17
 - Redis
 - Docker and Docker Compose
 - Kubernetes cluster (for Kubernetes deployment)
 - Helm 3+ (for Kubernetes deployment)
 
-## Local Development Setup
 Prerequisites to run the application
 1. Clone the repository and then create/update .env file using .env.example:
    ```
    git clone https://github.com/kampkelly/llm-benchmark.git
    cd llm-benchmark
    ```
+
+## Local Development Setup
 
 ##### Running the aplication
 To start the application in a single command, run this:
@@ -108,17 +109,11 @@ You can the access the rankings api (more details below) on port `8001`
    ```
   or `brew install helm`
 
-
-3. Navigate to the Helm chart directory:
-   ```
-   cd llm-benchmark-chart
-   ```
-
-4. Create/update .env file as described earlier
+3. Create/update .env file as described earlier
 <br>
 
 
-5. Run script to start
+4. Run script to start
 `./deploy.sh`
 This updates dependencies, copies some needed environment variables and then installs helm using the environment variables
 
@@ -233,7 +228,7 @@ This retry is managed by redis and also implements a lock to ensure only one job
 
 ## Data Visualization
 Grafana should already be installed and running after running `docker-compose up`.
-Once Grafana is running, open it in your browser: `http://localhost:3000`
+Once Grafana is running, open it in your browser: [http://localhost:3000](http://localhost:3000)
 1. Login to Grafana: Default login is admin/admin (you will be prompted to change the password).
 2. Install the Infinity datasource if it is not already installed
 3. Create a new dashboard and click on "Import". Then input the json in public/LLM_Performance_Dashboard.json in the input box and load. Now you should be able to view the data as shown below from the rankings api.

@@ -1,6 +1,7 @@
 import os
-import redis
 from enum import Enum
+
+import redis
 from dotenv import load_dotenv
 
 load_dotenv()

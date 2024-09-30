@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from database import settings_config
 from metric_benchmark.apis.base import api_router
 
@@ -9,7 +10,9 @@ def include_router(app):
 
 
 def start_application():
-    app = FastAPI(title=settings_config.PROJECT_NAME, version=settings_config.PROJECT_VERSION)
+    app = FastAPI(
+        title=settings_config.PROJECT_NAME, version=settings_config.PROJECT_VERSION
+    )
     origins = ["*"]
 
     app.add_middleware(

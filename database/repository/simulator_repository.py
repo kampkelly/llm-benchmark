@@ -1,8 +1,10 @@
-from uuid import UUID
 from typing import List, Tuple
+from uuid import UUID
+
 from fastapi import Depends
-from sqlalchemy import insert, func
+from sqlalchemy import func, insert
 from sqlalchemy.orm import Session
+
 from database import LLM, Metric, Simulation
 from database.session import get_db
 
@@ -12,6 +14,7 @@ class SimulatorRepository:
     This class handles database operations related to simulations.
     It provides methods to get all metrics, bulk add metrics, and remove all metrics.
     """
+
     def __init__(self, db: Session = Depends(get_db)):
         """
         Initializes the SimulatorRepository with a database session.
@@ -27,7 +30,9 @@ class SimulatorRepository:
         metrics = self.db.query(Simulation).all()
         return metrics
 
-    def bulk_add_metrics(self, llm_id: UUID, metric_id: UUID, metrics: List[Simulation]) -> int:
+    def bulk_add_metrics(
+        self, llm_id: UUID, metric_id: UUID, metrics: List[Simulation]
+    ) -> int:
         """
         Bulk adds simulation metrics to the database.
         Args:
@@ -71,8 +76,8 @@ class SimulatorRepository:
         """
         query = (
             self.db.query(
-                LLM.name.label('llm_name'),
-                func.avg(Simulation.value).label('mean_value')
+                LLM.name.label("llm_name"),
+                func.avg(Simulation.value).label("mean_value"),
             )
             .join(Simulation.llm)
             .join(Simulation.metric)

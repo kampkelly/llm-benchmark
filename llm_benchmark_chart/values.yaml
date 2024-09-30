@@ -43,6 +43,7 @@ postgresql:
       auth:
         username: runor
         password: "postgres"
+        postgresPassword: "postgres"
         database: llm_benchmark
 
 configMap:

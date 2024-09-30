@@ -1,7 +1,9 @@
 import json
+
 from fastapi import Depends, HTTPException
-from redis_client import RedisClient, RedisKeys
+
 from database import LLMRepository, MetricRepository, SimulatorRepository
+from redis_client import RedisClient, RedisKeys
 
 
 class BenchmarkService:
@@ -9,9 +11,13 @@ class BenchmarkService:
     This class provides a service for benchmarking large language models (LLMs)
     based on various metrics and simulations.
     """
-    def __init__(self, llm_repository: LLMRepository = Depends(LLMRepository), 
-                 metric_repository: MetricRepository = Depends(MetricRepository), 
-                 simulator_repository: SimulatorRepository = Depends(SimulatorRepository)):
+
+    def __init__(
+        self,
+        llm_repository: LLMRepository = Depends(LLMRepository),
+        metric_repository: MetricRepository = Depends(MetricRepository),
+        simulator_repository: SimulatorRepository = Depends(SimulatorRepository),
+    ):
         self.llm_repository = llm_repository
         self.metric_repository = metric_repository
         self.simulator_repository = simulator_repository
@@ -22,7 +28,9 @@ class BenchmarkService:
         """
         redis_client = RedisClient()
         if redis_client.redis.exists(RedisKeys.BENCHMARKS.value):
-            redis_results = json.loads(redis_client.redis.get(RedisKeys.BENCHMARKS.value))
+            redis_results = json.loads(
+                redis_client.redis.get(RedisKeys.BENCHMARKS.value)
+            )
             return {"data": redis_results}
 
         metrics = self.metric_repository.get_metrics()
@@ -30,7 +38,7 @@ class BenchmarkService:
         for metric in metrics:
             simulations = self.simulator_repository.get_metric_means_by_llm(metric.name)
             rounded_simulations = [
-                {'llm_name': sim[0], 'mean_value': round(sim[1], 2)}
+                {"llm_name": sim[0], "mean_value": round(sim[1], 2)}
                 for sim in simulations
             ]
             results.append({metric.name: rounded_simulations})
@@ -44,8 +52,14 @@ class BenchmarkService:
         Retrieves a metric and its corresponding simulations, then ranks the llms based on the mean values.
         """
         redis_client = RedisClient()
-        if redis_client.redis.exists(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}"):
-            redis_results = json.loads(redis_client.redis.get(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}"))
+        if redis_client.redis.exists(
+            f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}"
+        ):
+            redis_results = json.loads(
+                redis_client.redis.get(
+                    f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}"
+                )
+            )
             return {"data": redis_results}
 
         metric = self.metric_repository.get_metric_by_name(metric_name)
@@ -54,11 +68,12 @@ class BenchmarkService:
 
         simulations = self.simulator_repository.get_metric_means_by_llm(metric.name)
         rounded_simulations = [
-            {'llm_name': sim[0], 'mean_value': round(sim[1], 2)}
-            for sim in simulations
+            {"llm_name": sim[0], "mean_value": round(sim[1], 2)} for sim in simulations
         ]
         result = {metric.name: rounded_simulations}
 
-        redis_client.redis.set(f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}", json.dumps(result))
+        redis_client.redis.set(
+            f"{RedisKeys.METRIC_BENCHMARKS.value}:{metric_name}", json.dumps(result)
+        )
 
         return {"data": result}
