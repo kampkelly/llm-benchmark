@@ -16,6 +16,7 @@ from database import (
 )
 from database.seed import seed_data
 from database.session import engine, get_db
+from logger import logging
 from metric_simulator.metric_service import MetricService
 
 load_dotenv()
@@ -78,8 +79,8 @@ async def lifespan(app: FastAPI):
     scheduler.shutdown()
     scheduler_thread.join(timeout=10)  # Wait up to 10 seconds for the thread to finish
     if scheduler_thread.is_alive():
-        print("Warning: Scheduler thread did not shut down cleanly")
-    print("Scheduler shutdown complete")
+        logging.info("Warning: Scheduler thread did not shut down cleanly")
+    logging.info("Scheduler shutdown complete")
 
 
 app = start_application(lifespan)

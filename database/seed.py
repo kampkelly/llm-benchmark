@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
 
 from database import LLM, Metric
+from logger import logging
 
 
 def seed_metrics(db: Session):
     if db.query(Metric).count() > 0:
-        print("Metrics table is not empty. Seeding skipped.")
+        logging.info("Metrics table is not empty. Seeding skipped.")
         return
 
     metric_names = [
@@ -20,12 +21,12 @@ def seed_metrics(db: Session):
         db.add(metric)
 
     db.commit()
-    print("Metrics seeded successfully.")
+    logging.info("Metrics seeded successfully.")
 
 
 def seed_llms(db: Session):
     if db.query(LLM).count() > 0:
-        print("LLM table is not empty. Seeding skipped.")
+        logging.info("LLM table is not empty. Seeding skipped.")
         return
 
     llm_names = [
@@ -39,7 +40,7 @@ def seed_llms(db: Session):
         db.add(llm)
 
     db.commit()
-    print("LLMs seeded successfully.")
+    logging.info("LLMs seeded successfully.")
 
 
 def seed_data(db: Session):

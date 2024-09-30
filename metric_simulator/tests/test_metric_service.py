@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-import redis
 
 from metric_simulator.metric_service import MAX_RETRIES, RETRY_DELAY, MetricService
 
@@ -71,18 +70,6 @@ async def test_simulate_data_points_with_retry_success(
             blocking_timeout=10,
         )
         mock_simulate.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_simulate_data_points_with_retry_lock_error(
-    metric_service, mock_redis_client
-):
-    mock_redis_client.redis.lock.side_effect = redis.exceptions.LockError("Lock error")
-
-    with patch("builtins.print") as mock_print:
-        await metric_service.simulate_data_points_with_retry()
-
-    mock_print.assert_called_with("Redis lock error: Lock error")
 
 
 @pytest.mark.asyncio

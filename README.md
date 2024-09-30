@@ -30,17 +30,18 @@ The LLM Benchmark application is designed to benchmark and simulate metrics for 
 ## Prerequisites
 
 - Python 3.12
-- Postgres 3.17
+- Postgres 17.0
 - Redis
 - Docker and Docker Compose
 - Kubernetes cluster (for Kubernetes deployment)
 - Helm 3+ (for Kubernetes deployment)
 
 Prerequisites to run the application
-1. Clone the repository and then create/update .env file using .env.example:
+1. Clone the repository and then create/update .env values file using .env.example:
    ```
    git clone https://github.com/kampkelly/llm-benchmark.git
    cd llm-benchmark
+   cp .env.example .env
    ```
 
 ## Local Development Setup
@@ -55,11 +56,11 @@ For a detailed breakdown, see the below steps:
 1. Create a virtual environment and activate it:
    ```
    python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   source venv/bin/activate
    ```
 
 2. Install dependencies:
-   `pip install -r requirements.txt` or `make install`
+   `make install`
 <br>
 
 3. Set up your `.env` file with the necessary environment variables:
@@ -77,14 +78,16 @@ For a detailed breakdown, see the below steps:
    ```
 
 4. Run database migrations:
-   `alembic upgrade head` or `make run-migrations`
+   `make run-migrations`
 <br>
 5. Start the services:
-    Metric simulator
-   `uvicorn metric_simulator.main:app --reload` or `make start-simulator`
+    Metric simulator: 
+
+   `make start-simulator`
 
    Metric benchmark (In a separate terminal):
-   `uvicorn metric_benchmark.main:app --reload --port 8001` or `make start-benchmark`
+
+   `make start-benchmark`
 
 ## Docker Compose Setup
 

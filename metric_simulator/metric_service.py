@@ -5,6 +5,7 @@ import redis
 from dotenv import load_dotenv
 
 from database import LLMRepository, MetricRepository, SimulatorRepository
+from logger import logging
 from metric_simulator.lib import MetricGenerator
 from metric_simulator.utils import retry_on_failure
 from redis_client import RedisClient, RedisKeys
@@ -53,16 +54,16 @@ class MetricService:
             ) as lock:
                 await self.simulate_data_points()
         except redis.exceptions.LockError as lock_error:
-            print(f"Redis lock error: {lock_error}")
+            logging.error(f"Redis lock error: {lock_error}")
         except Exception as e:
-            print(f"Error during simulating data points: {e}")
+            logging.error(f"Error during simulating data points: {e}")
         finally:
             # Check if the lock exists and locked before trying to release
             if "lock" in locals() and lock.locked():
                 try:
                     lock.release()
                 except redis.exceptions.LockError:
-                    print("Lock was already released")
+                    logging.info("Lock was already released")
 
     async def simulate_data_points(self):
         """

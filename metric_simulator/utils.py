@@ -5,6 +5,7 @@ import os
 import numpy as np
 from dotenv import load_dotenv
 
+from logger import logging
 from redis_client import RedisKeys
 
 load_dotenv()
@@ -31,7 +32,7 @@ def retry_on_failure(redis_client, max_retries=5, delay=60):
                     redis_client.redis.set(
                         retry_key, current_attempt + 1, ex=60
                     )  # Set expiry for 60 seconds
-                    print(
+                    logging.error(
                         f"Error generating metrics for LLM {llm_name}, attempt {current_attempt + 1}: {str(e)}"
                     )
                     current_attempt += 1
@@ -39,7 +40,7 @@ def retry_on_failure(redis_client, max_retries=5, delay=60):
                         # wait before retrying
                         await asyncio.sleep(delay)
 
-            print(
+            logging.info(
                 f"Max retries reached for LLM {llm_name} for metric {metric_name}, skipping."
             )
             return None
