@@ -49,7 +49,7 @@ Prerequisites to run the application
 ##### Running the aplication
 To start the application in a single command, run this:
 ```
-chmod +x ./dev-deploy.sh && ./dev-deploy.sh
+make start
 ```
 
 For a detailed breakdown, see the below steps:
@@ -99,7 +99,7 @@ For a detailed breakdown, see the below steps:
    ```
 
 This will start the metric benchmark service, metric simulator service, PostgreSQL, and Redis.
-You can the access the rankings api (more details below) on port `8001`
+You can the access the rankings api (more details below) on `http://localhost:8001/api/v1/benchmarks/rankings`
 
 
 ## Kubernetes Deployment
@@ -144,14 +144,14 @@ The application can be configured using environment variables. The main configur
 
 Once the application is running, you can interact with it using the provided APIs. The main endpoints are:
 
-##### Metric Benchmark Rankings API: `http://localhost:8001/api/v1/benchmarks/rankings`
+##### Metric Benchmark Rankings APIs: `http://localhost:8001`
 
-This API provides an endpoint to fetch the rankings of various Language Learning Models (LLMs) based on their benchmark results. The rankings are calculated using simulation metrics such as Time to First Token (TTFT), Tokens Per Second (TPS), End-to-End Request Latency (e2e_latency), and Requests Per Second (RPS).
-
+Accessing any of these endpoints below requires an api-key sent in the request headers under `x-api-key`. The value of this api key can be set in the .env file. `API_KEY=1234`
 ##### Endpoints
 
 - **GET** `/api/v1/benchmarks/rankings`
-Accessing this endpoint requires an api-key sent in the request headers under `x-api-key`. The value of this api key can be set in the .env file `API_KEY=1234`
+
+This API provides an endpoint to fetch the rankings of various Language Learning Models (LLMs) based on their benchmark results for all metrics. The rankings are calculated using simulation metrics such as Time to First Token (TTFT), Tokens Per Second (TPS), End-to-End Request Latency (e2e_latency), and Requests Per Second (RPS).
 
 <br>
 
@@ -190,7 +190,10 @@ The response will be a JSON object containing the rankings of LLMs for all the m
 <br>
 
 - **GET** `/api/v1/benchmarks/rankings/{metric_name}`
-Accessing this endpoint requires an api-key sent in the request headers under `x-api-key`. The value of this api key can be set in the .env file `API_KEY=1234`
+This API provides an endpoint to fetch the rankings of a metric of various Language Learning Models (LLMs) based on their benchmark results. The rankings are calculated using simulation metrics such as Time to First Token (TTFT), Tokens Per Second (TPS), End-to-End Request Latency (e2e_latency), and Requests Per Second (RPS).
+
+- **Parameters**
+where `metric_name` is one of `ttft`, `tps`, `e2e_latency`, `rps`
 <br>
 - **Response**
 The response will be a JSON object containing the rankings of LLMs for the specified metric. The structure of the response is as follows (in descending ranking order):

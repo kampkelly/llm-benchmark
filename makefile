@@ -56,6 +56,9 @@ tests:
 	@echo "Installing packages..."
 	REDIS_HOST=localhost pytest metric_benchmark metric_simulator
 
+start:
+	chmod +x ./dev-deploy.sh && ./dev-deploy.sh
+
 # Help command to display available commands
 help:
 	@echo "Available commands"
@@ -67,4 +70,5 @@ help:
 	@echo "  make start-simulator   - Start the Simulator FastAPI app"
 	@echo "  make start-benchmark   - Start the Benchmark FastAPI app"
 	@echo "  make tests   					- Run tests
+	@echo "  make start   					- Start applications
 	@echo "  make help              - Display this help message"
