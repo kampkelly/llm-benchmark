@@ -232,8 +232,8 @@ This retry is managed by redis and also implements a lock to ensure only one job
 ## Data Visualization
 Grafana should already be installed and running after running `docker-compose up`.
 Once Grafana is running, open it in your browser: [http://localhost:3000](http://localhost:3000)
-1. Login to Grafana: Default login is admin/admin (you will be prompted to change the password).
-2. Install the Infinity datasource if it is not already installed
+1. Login to Grafana: Default login is username: admin, password: password or what was specified for password as `GF_SECURITY_ADMIN_PASSWORD` in .env file.
+2. Install the Infinity datasource if it is not already installed and add as a Data source.
 3. Create a new dashboard and click on "Import". Then input the json in public/LLM_Performance_Dashboard.json in the input box and load. Now you should be able to view the data as shown below from the rankings api.
 
 <img src="./public/dashboard.png" alt="Dashboard Preview" width="800" height="400">
